@@ -34,27 +34,8 @@ class PartialVariableHashFilter {
     private BigInteger[] array;
     private byte size;
 
-//    short size; // (2 Bytes)
-//    float proprate; // (4bytes)
-
     public PartialVariableHashFilter(byte[] data) {
         readFrom(data);
-    }
-
-//    public PartialVariableHashFilter(short minsize, byte partitionoffset, int numberOfElements, float proprate) {
-//        proprate = prorate;
-//        this.array = array;
-//        actualsize = calc(partitionoffset, numberOfElements, proprate)
-//
-//        if (actualsize < minsize) size = minsize
-//        else size = actualsize
-//    }
-
-    public void add(byte[] value) {
-//        if (value.length > size) value.drop(...)  //drop the first bytes which are too much
-//
-//        array.append(BigInteger(value))
-//        array.sort()  //bubble sort/quicksort
     }
 
     public boolean mightContain(byte[] value) {
