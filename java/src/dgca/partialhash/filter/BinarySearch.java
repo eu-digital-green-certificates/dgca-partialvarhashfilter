@@ -37,12 +37,12 @@ class BinarySearch {
      * @param toIndex   the end of the range (exclusive) to search in, size of this array by default.
      * @return the index of the element, if it is contained in the array within the specified range;
      */
-    int binarySearch(BigInteger[] array, int fromIndex, int toIndex, BigInteger element) {
+    boolean binarySearch(BigInteger[] array, int fromIndex, int toIndex, BigInteger element) {
         if (toIndex >= fromIndex) {
             int middle = fromIndex + (toIndex - fromIndex) / 2;
 
             if (array[middle].compareTo(element) == 0) {
-                return middle;
+                return true;
             }
 
             if (array[middle].compareTo(element) > 0) {
@@ -52,6 +52,6 @@ class BinarySearch {
             return binarySearch(array, middle + 1, toIndex, element);
         }
 
-        return -1;
+        return false;
     }
 }

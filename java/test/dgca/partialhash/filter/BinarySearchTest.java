@@ -38,8 +38,8 @@ class BinarySearchTest {
                 new BigInteger(new byte[]{8, 2})
         };
         int toIndex = intArray.length - 1;
-        int result = new BinarySearch().binarySearch(intArray, 0, toIndex, new BigInteger(new byte[]{4, 0}));
-        assert result == 3;
+        boolean result = new BinarySearch().binarySearch(intArray, 0, toIndex, new BigInteger(new byte[]{4, 0}));
+        assert result;
     }
 
     @Test
@@ -51,7 +51,7 @@ class BinarySearchTest {
                 new BigInteger(new byte[]{8, 2})
         };
         int toIndex = intArray.length - 1;
-        int result = new BinarySearch().binarySearch(intArray, 0, toIndex, new BigInteger(new byte[]{0, 6}));
-        assert result == -1;
+        boolean result = new BinarySearch().binarySearch(intArray, 0, toIndex, new BigInteger(new byte[]{0, 6}));
+        assert !result;
     }
 }
