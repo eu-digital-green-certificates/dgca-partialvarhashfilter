@@ -25,6 +25,7 @@ package dgca.partialhash.filter;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.Arrays;
 
 public class PartialVariableHashFilterTest {
@@ -46,5 +47,63 @@ public class PartialVariableHashFilterTest {
         PartialVariableHashFilter filter = new PartialVariableHashFilter(byteArray);
         byte[] result = filter.writeTo();
         assert Arrays.equals(result, byteArray);
+    }
+
+    @Test
+    public void initPointPartitionHashFilterTest() {
+        int numberOfElements = 1000;
+        byte minSize = 1;
+        PartitionOffset partitionOffset = PartitionOffset.POINT;
+        float probRate = 0.000001F;
+
+        PartialVariableHashFilter filter = new PartialVariableHashFilter(minSize, partitionOffset, numberOfElements, probRate);
+        byte result = filter.getSize();
+        assert result == 9;
+    }
+
+    @Test
+    public void initVectorPartitionHashFilterTest() {
+        int numberOfElements = 1000;
+        byte minSize = 1;
+        PartitionOffset partitionOffset = PartitionOffset.VECTOR;
+        float probRate = 0.000001F;
+
+        PartialVariableHashFilter filter = new PartialVariableHashFilter(minSize, partitionOffset, numberOfElements, probRate);
+        byte result = filter.getSize();
+        assert result == 1;
+    }
+
+    @Test
+    public void initCoordinatePartitionHashFilterTest() {
+        int numberOfElements = 1000;
+        byte minSize = 1;
+        PartitionOffset partitionOffset = PartitionOffset.COORDINATE;
+        float probRate = 0.000001F;
+
+        PartialVariableHashFilter filter = new PartialVariableHashFilter(minSize, partitionOffset, numberOfElements, probRate);
+        byte result = filter.getSize();
+        assert result == 1;
+    }
+
+    @Test
+    public void addHashesToFilterTest() {
+        int numberOfElements = 10;
+        byte minSize = 1;
+        PartitionOffset partitionOffset = PartitionOffset.POINT;
+        float probRate = 0.000001F;
+        byte[] array = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}; // length = 3
+        BigInteger[] expectedArray = new BigInteger[]{
+                new BigInteger("197637"),
+                new BigInteger("395016"),
+                new BigInteger("592395")
+        };
+
+        PartialVariableHashFilter filter = new PartialVariableHashFilter(minSize, partitionOffset, numberOfElements, probRate);
+        byte result = filter.getSize();
+        filter.add(array);
+        BigInteger[] arrayResult = filter.getArray();
+
+        assert result == 3;
+        assert Arrays.equals(arrayResult, expectedArray);
     }
 }

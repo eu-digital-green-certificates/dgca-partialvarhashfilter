@@ -34,15 +34,42 @@ class PartialVariableHashFilter {
     private BigInteger[] array;
     private byte size;
 
+    /**
+     * Partial variable hash list filter initialization
+     *
+     * @param data bytearray of partial variable hashes
+     */
     public PartialVariableHashFilter(byte[] data) {
         readFrom(data);
     }
 
-    public boolean mightContain(byte[] value) {
-        return new BinarySearch().binarySearch(array, 0, array.length, new BigInteger(value));
+    /**
+     * Partial variable hash list filter initialization
+     *
+     * @param minSize          minimum size of the filter
+     * @param partitionOffset  coordinate = 16, vector = 8, point = 0
+     * @param numberOfElements elements in the filter
+     * @param propRate         probability rate
+     * @see PartitionOffset
+     */
+    public PartialVariableHashFilter(byte minSize, PartitionOffset partitionOffset, int numberOfElements, float propRate) {
+        byte actualSize = calc(partitionOffset.value, numberOfElements, propRate);
+
+        if (actualSize < minSize) {
+            size = minSize;
+        } else {
+            size = actualSize;
+        }
+
+        array = new BigInteger[size];
     }
 
-    public void readFrom(byte @NotNull [] data) {
+    private byte calc(byte partitionOffset, int numberOfElements, float propRate) {
+        double num = Math.log10(numberOfElements) / Math.log10(2);
+        return (byte) (num - partitionOffset + propRate);
+    }
+
+    private void readFrom(byte @NotNull [] data) {
         if (data.length == 0) {
             return;
         }
@@ -68,6 +95,35 @@ class PartialVariableHashFilter {
         }
 
         return outputStream.toByteArray();
+    }
+
+    public void add(byte @NotNull [] data) {
+        if (data.length / size > array.length) {
+            return;
+        }
+
+        int startPointer = data.length % size;
+
+        int hashNumCounter = 0;
+        while (startPointer < data.length) {
+            array[hashNumCounter] = new BigInteger(Arrays.copyOfRange(data, startPointer, startPointer + size));
+            startPointer += size;
+            hashNumCounter++;
+        }
+
+        Arrays.sort(array);
+    }
+
+    public boolean mightContain(byte[] value) {
+        return new BinarySearch().binarySearch(array, 0, array.length, new BigInteger(value));
+    }
+
+    public byte getSize() {
+        return size;
+    }
+
+    public BigInteger[] getArray() {
+        return array;
     }
 }
 
