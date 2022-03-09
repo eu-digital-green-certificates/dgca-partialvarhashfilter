@@ -28,11 +28,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.logging.Logger;
 
 class PartialVariableHashFilter {
 
     private BigInteger[] array;
     private byte size;
+    private int numberOfElements;
 
     /**
      * Partial variable hash list filter initialization
@@ -55,6 +57,7 @@ class PartialVariableHashFilter {
     public PartialVariableHashFilter(byte minSize, @NotNull PartitionOffset partitionOffset, int numberOfElements, float propRate) {
         byte actualSize = calc(partitionOffset.value, numberOfElements, propRate);
 
+        this.numberOfElements = numberOfElements;
         if (actualSize < minSize) {
             size = minSize;
         } else {
@@ -110,7 +113,8 @@ class PartialVariableHashFilter {
             throw new IllegalArgumentException("Data length cannot be less than hash size");
         }
 
-        array = new BigInteger[dataLength / size];
+        int hashesSizeInData = dataLength / size;
+        array = new BigInteger[hashesSizeInData];
 
         int startPointer = 0;
         int hashNumCounter = 0;
@@ -118,6 +122,11 @@ class PartialVariableHashFilter {
             array[hashNumCounter] = new BigInteger(Arrays.copyOfRange(data, startPointer, startPointer + size));
             startPointer += size;
             hashNumCounter++;
+        }
+
+        if (hashesSizeInData > numberOfElements) {
+            Logger.getGlobal().warning("Filter has more elements than expected. " +
+                    "It may result in a higher False Positve Rate than defined!");
         }
 
         Arrays.sort(array);
