@@ -52,7 +52,7 @@ class PartialVariableHashFilter {
      * @param propRate         probability rate
      * @see PartitionOffset
      */
-    public PartialVariableHashFilter(byte minSize, PartitionOffset partitionOffset, int numberOfElements, float propRate) {
+    public PartialVariableHashFilter(byte minSize, @NotNull PartitionOffset partitionOffset, int numberOfElements, float propRate) {
         byte actualSize = calc(partitionOffset.value, numberOfElements, propRate);
 
         if (actualSize < minSize) {
@@ -60,13 +60,12 @@ class PartialVariableHashFilter {
         } else {
             size = actualSize;
         }
-
-        array = new BigInteger[size];
     }
 
     private byte calc(byte partitionOffset, int numberOfElements, float propRate) {
-        double num = Math.log10(numberOfElements) / Math.log10(2);
-        return (byte) (num - partitionOffset + propRate);
+        double num = Math.ceil(Math.log10(numberOfElements) / Math.log10(2));
+        double rounded = num / 8 + num % 8;
+        return (byte) Math.ceil(rounded - partitionOffset + propRate);
     }
 
     private void readFrom(byte @NotNull [] data) {
@@ -97,21 +96,33 @@ class PartialVariableHashFilter {
         return outputStream.toByteArray();
     }
 
-    public void add(byte @NotNull [] data) {
-        if (data.length / size > array.length) {
-            return;
+    /**
+     * Convert binary data into searchable array of BigIntegers.
+     *
+     * @param data binary data
+     * @return number of bytes not added to the filter
+     * @throws IllegalArgumentException when data is less than hash size
+     */
+    public int add(byte @NotNull [] data) throws IllegalArgumentException {
+        int dataLength = data.length;
+
+        if (dataLength < size) {
+            throw new IllegalArgumentException("Data length cannot be less than hash size");
         }
 
-        int startPointer = data.length % size;
+        array = new BigInteger[dataLength / size];
 
+        int startPointer = 0;
         int hashNumCounter = 0;
-        while (startPointer < data.length) {
+        while (startPointer < dataLength && hashNumCounter < array.length) {
             array[hashNumCounter] = new BigInteger(Arrays.copyOfRange(data, startPointer, startPointer + size));
             startPointer += size;
             hashNumCounter++;
         }
 
         Arrays.sort(array);
+
+        return dataLength - startPointer;
     }
 
     public boolean mightContain(byte[] value) {

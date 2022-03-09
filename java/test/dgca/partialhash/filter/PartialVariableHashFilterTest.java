@@ -22,6 +22,7 @@
 
 package dgca.partialhash.filter;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -58,7 +59,7 @@ public class PartialVariableHashFilterTest {
 
         PartialVariableHashFilter filter = new PartialVariableHashFilter(minSize, partitionOffset, numberOfElements, probRate);
         byte result = filter.getSize();
-        assert result == 9;
+        assert result == 4;
     }
 
     @Test
@@ -70,19 +71,36 @@ public class PartialVariableHashFilterTest {
 
         PartialVariableHashFilter filter = new PartialVariableHashFilter(minSize, partitionOffset, numberOfElements, probRate);
         byte result = filter.getSize();
-        assert result == 1;
+        assert result == 3;
     }
 
     @Test
     public void initCoordinatePartitionHashFilterTest() {
-        int numberOfElements = 1000;
-        byte minSize = 1;
+        int numberOfElements = 625000;
+        byte minSize = 4;
         PartitionOffset partitionOffset = PartitionOffset.COORDINATE;
         float probRate = 0.000001F;
 
         PartialVariableHashFilter filter = new PartialVariableHashFilter(minSize, partitionOffset, numberOfElements, probRate);
         byte result = filter.getSize();
-        assert result == 1;
+        assert result == 5;
+    }
+
+    @Test
+    public void addHashesToFilterIncorrectBinaryTest() {
+        int numberOfElements = 10;
+        byte minSize = 1;
+        PartitionOffset partitionOffset = PartitionOffset.POINT;
+        float probRate = 0.000001F;
+        byte[] array = new byte[]{1, 2, 3, 4}; // length = 5
+
+        PartialVariableHashFilter filter = new PartialVariableHashFilter(minSize, partitionOffset, numberOfElements, probRate);
+        try {
+            filter.add(array);
+            Assertions.fail();
+        } catch (IllegalArgumentException ex) {
+            System.out.println("Test success");
+        }
     }
 
     @Test
@@ -91,19 +109,50 @@ public class PartialVariableHashFilterTest {
         byte minSize = 1;
         PartitionOffset partitionOffset = PartitionOffset.POINT;
         float probRate = 0.000001F;
-        byte[] array = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}; // length = 3
+        byte[] array = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}; // length = 5
         BigInteger[] expectedArray = new BigInteger[]{
-                new BigInteger("197637"),
-                new BigInteger("395016"),
-                new BigInteger("592395")
+                new BigInteger("4328719365"),
+                new BigInteger("25887770890")
         };
 
         PartialVariableHashFilter filter = new PartialVariableHashFilter(minSize, partitionOffset, numberOfElements, probRate);
-        byte result = filter.getSize();
         filter.add(array);
         BigInteger[] arrayResult = filter.getArray();
 
-        assert result == 3;
+        assert filter.getSize() == 5;
         assert Arrays.equals(arrayResult, expectedArray);
+    }
+
+    @Test
+    public void addHashesToFilterSortTest() {
+        int numberOfElements = 10;
+        byte minSize = 1;
+        PartitionOffset partitionOffset = PartitionOffset.POINT;
+        float probRate = 0.000001F;
+        byte[] array = new byte[]{6, 7, 8, 9, 10, 1, 2, 3, 4, 5}; // length = 5
+        BigInteger[] expectedArray = new BigInteger[]{
+                new BigInteger("4328719365"),
+                new BigInteger("25887770890")
+        };
+
+        PartialVariableHashFilter filter = new PartialVariableHashFilter(minSize, partitionOffset, numberOfElements, probRate);
+        filter.add(array);
+        BigInteger[] arrayResult = filter.getArray();
+
+        assert filter.getSize() == 5;
+        assert Arrays.equals(arrayResult, expectedArray);
+    }
+
+    @Test
+    public void addHashesToFilterDropTest() {
+        int numberOfElements = 10;
+        byte minSize = 1;
+        PartitionOffset partitionOffset = PartitionOffset.POINT;
+        float probRate = 0.000001F;
+        byte[] array = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13}; // length = 5
+        PartialVariableHashFilter filter = new PartialVariableHashFilter(minSize, partitionOffset, numberOfElements, probRate);
+        int notAddedBytes = filter.add(array);
+
+        assert notAddedBytes == 3;
     }
 }

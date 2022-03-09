@@ -23,8 +23,8 @@
 package dgca.partialhash.filter;
 
 public enum PartitionOffset {
-    COORDINATE((byte) 16),
-    VECTOR((byte) 8),
+    COORDINATE((byte) 2),
+    VECTOR((byte) 1),
     POINT((byte) 0);
 
     public final byte value;
