@@ -20,7 +20,7 @@
  *  Created by mykhailo.nester on 04/03/2022, 16:39
  */
 
-package dgca.partialhash.filter;
+package eu.europa.ec.dgc.partialvariablehashfilter;
 
 import java.math.BigInteger;
 

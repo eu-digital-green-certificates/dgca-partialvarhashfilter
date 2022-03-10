@@ -20,7 +20,8 @@
  *  Created by mykhailo.nester on 07/03/2022, 17:15
  */
 
-package dgca.partialhash.filter;
+package eu.europa.ec.dgc.partialvariablehashfilter;
+
 
 import org.jetbrains.annotations.NotNull;
 

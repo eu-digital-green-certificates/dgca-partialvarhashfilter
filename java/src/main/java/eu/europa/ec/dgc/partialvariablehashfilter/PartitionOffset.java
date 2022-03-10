@@ -20,7 +20,7 @@
  *  Created by mykhailo.nester on 08/03/2022, 18:22
  */
 
-package dgca.partialhash.filter;
+package eu.europa.ec.dgc.partialvariablehashfilter;
 
 public enum PartitionOffset {
     COORDINATE((byte) 2),

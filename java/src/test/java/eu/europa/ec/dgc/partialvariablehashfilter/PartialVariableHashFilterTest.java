@@ -20,14 +20,14 @@
  *  Created by mykhailo.nester on 07/03/2022, 18:43
  */
 
-package dgca.partialhash.filter;
+package  eu.europa.ec.dgc.partialvariablehashfilter;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Arrays;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 
 public class PartialVariableHashFilterTest {
 
