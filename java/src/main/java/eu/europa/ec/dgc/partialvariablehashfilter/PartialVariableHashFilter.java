@@ -23,19 +23,20 @@
 package eu.europa.ec.dgc.partialvariablehashfilter;
 
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.logging.Logger;
+import org.jetbrains.annotations.NotNull;
 
 class PartialVariableHashFilter {
 
     private BigInteger[] array;
     private byte size;
-    private int numberOfElements;
+    private int maxNumberOfElements;
+    private int elementsCount;
 
     /**
      * Partial variable hash list filter initialization
@@ -58,7 +59,10 @@ class PartialVariableHashFilter {
     public PartialVariableHashFilter(byte minSize, @NotNull PartitionOffset partitionOffset, int numberOfElements, float propRate) {
         byte actualSize = calc(partitionOffset.value, numberOfElements, propRate);
 
-        this.numberOfElements = numberOfElements;
+        this.maxNumberOfElements = numberOfElements;
+        this.elementsCount = 0;
+        this.array = new BigInteger[numberOfElements];
+
         if (actualSize < minSize) {
             size = minSize;
         } else {
@@ -78,61 +82,69 @@ class PartialVariableHashFilter {
         }
 
         size = data[0];
-        int numHashes = (data.length - 1) / size;
-        array = new BigInteger[numHashes];
+        maxNumberOfElements = (data.length - 1) / size;
+        array = new BigInteger[maxNumberOfElements];
+        elementsCount = 0;
 
-        int hashNumCounter = 0;
         int counter = 1;
-        while (counter < data.length) {
-            array[hashNumCounter] = new BigInteger(Arrays.copyOfRange(data, counter, counter + size));
+        while (counter < data.length && elementsCount < maxNumberOfElements) {
+            array[elementsCount] = new BigInteger(Arrays.copyOfRange(data, counter, counter + size));
             counter += size;
-            hashNumCounter++;
+            elementsCount++;
         }
+
+        Arrays.sort(array, Comparator.nullsLast(Comparator.naturalOrder()));
     }
 
     public byte[] writeTo() throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         outputStream.write(size);
         for (BigInteger bigInteger : array) {
-            outputStream.write(bigInteger.toByteArray());
+            if(bigInteger != null) {
+                byte[] bytes = bigInteger.toByteArray();
+                int length = bytes.length;
+
+                while (length < size) {
+                    outputStream.write(0);
+                    length++;
+                }
+
+                outputStream.write(bytes);
+            }
         }
 
         return outputStream.toByteArray();
     }
 
     /**
-     * Convert binary data into searchable array of BigIntegers.
+     * Add hash data into searchable array of BigIntegers.
      *
-     * @param data binary data
-     * @return number of bytes not added to the filter
-     * @throws IllegalArgumentException when data is less than hash size
+     * @param data binary hash data
+     * @throws IllegalArgumentException when data is less than partial hash size
      */
-    public int add(byte @NotNull [] data) throws IllegalArgumentException {
-        int dataLength = data.length;
+    public void add(byte @NotNull [] data) throws IllegalArgumentException {
 
-        if (dataLength < size) {
-            throw new IllegalArgumentException("Data length cannot be less than hash size");
+        if (data.length < size) {
+            throw new IllegalArgumentException("Data length cannot be less than partial hash size");
         }
 
-        int hashesSizeInData = dataLength / size;
-        array = new BigInteger[hashesSizeInData];
-
-        int startPointer = 0;
-        int hashNumCounter = 0;
-        while (startPointer < dataLength && hashNumCounter < array.length) {
-            array[hashNumCounter] = new BigInteger(Arrays.copyOfRange(data, startPointer, startPointer + size));
-            startPointer += size;
-            hashNumCounter++;
-        }
-
-        if (hashesSizeInData > numberOfElements) {
+        if (elementsCount == maxNumberOfElements) {
             Logger.getGlobal().warning("Filter has more elements than expected. " +
-                    "It may result in a higher False Positve Rate than defined!");
+                "It may result in a higher False Positive Rate than defined!");
+
+            maxNumberOfElements += 1;
+            BigInteger [] newArray = new BigInteger[maxNumberOfElements];
+
+            if (elementsCount >= 0) {
+                System.arraycopy(array, 0, newArray, 0, elementsCount);
+            }
+            array = newArray;
         }
 
-        Arrays.sort(array);
+        array[elementsCount] = new BigInteger(Arrays.copyOf(data, size));
+        elementsCount++;
 
-        return dataLength - startPointer;
+        Arrays.sort(array, Comparator.nullsLast(Comparator.naturalOrder()));
     }
 
     /**
@@ -157,5 +169,10 @@ class PartialVariableHashFilter {
     public BigInteger[] getArray() {
         return array;
     }
+
+    public int getElementsCount() {
+        return elementsCount;
+    }
+
 }
 
