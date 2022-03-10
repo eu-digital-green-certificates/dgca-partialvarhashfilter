@@ -134,8 +134,19 @@ class PartialVariableHashFilter {
         return dataLength - startPointer;
     }
 
-    public boolean mightContain(byte[] value) {
-        return new BinarySearch().binarySearch(array, 0, array.length, new BigInteger(value));
+    /**
+     * Check whether filter contains dcc hash bytes. It will check bytes depending on the filter size value.
+     *
+     * @param dccHashBytes byte array of dcc hash.
+     * @return true is contains otherwise false
+     */
+    public boolean mightContain(byte[] dccHashBytes) {
+        if (dccHashBytes.length < size) {
+            return false;
+        }
+
+        byte[] filterSizeBytes = Arrays.copyOf(dccHashBytes, size);
+        return new BinarySearch().binarySearch(array, 0, array.length, new BigInteger(filterSizeBytes));
     }
 
     public byte getSize() {
