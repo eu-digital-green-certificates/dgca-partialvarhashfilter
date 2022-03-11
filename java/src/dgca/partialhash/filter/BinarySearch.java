@@ -24,7 +24,7 @@ package dgca.partialhash.filter;
 
 import java.math.BigInteger;
 
-class BinarySearch {
+public class BinarySearch {
 
     /**
      * Searches the array or the range of the array for the provided [element] using the binary search algorithm.
@@ -37,9 +37,13 @@ class BinarySearch {
      * @param toIndex   the end of the range (exclusive) to search in, size of this array by default.
      * @return the index of the element, if it is contained in the array within the specified range;
      */
-    boolean binarySearch(BigInteger[] array, int fromIndex, int toIndex, BigInteger element) {
+    public boolean binarySearch(BigInteger[] array, int fromIndex, int toIndex, BigInteger element) {
         if (toIndex >= fromIndex) {
             int middle = fromIndex + (toIndex - fromIndex) / 2;
+
+            if (middle < 0 || middle >= array.length) {
+                return false;
+            }
 
             if (array[middle].compareTo(element) == 0) {
                 return true;
