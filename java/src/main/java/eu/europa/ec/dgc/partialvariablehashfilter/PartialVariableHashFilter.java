@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 
-class PartialVariableHashFilter {
+public class PartialVariableHashFilter {
     private List<BigInteger> arrayList;
     private byte size;
     private float probRate;
