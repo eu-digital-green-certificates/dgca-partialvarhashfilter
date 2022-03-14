@@ -33,7 +33,7 @@ public class PartialVariableHashFilterTest {
 
     @Test
     public void mightContainTest() {
-        byte[] byteArray = new byte[]{2, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}; // length = 2
+        byte[] byteArray = new byte[]{0, 1, 53, -122, 55, -67, 0, 0, 0, 6, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}; // length = 2
         byte[] searchedArray = new byte[]{3, 4};
 
         PartialVariableHashFilter filter = new PartialVariableHashFilter(byteArray);
@@ -43,7 +43,7 @@ public class PartialVariableHashFilterTest {
 
     @Test
     public void filterToBinaryTest() throws IOException {
-        byte[] byteArray = new byte[]{2, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}; // length = 2
+        byte[] byteArray = new byte[]{0, 1, 53, -122, 55, -67, 0, 0, 0, 6, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}; // length = 2
 
         PartialVariableHashFilter filter = new PartialVariableHashFilter(byteArray);
         byte[] result = filter.writeTo();
@@ -52,8 +52,6 @@ public class PartialVariableHashFilterTest {
 
     @Test
     public void filterToBinaryPartlyFilledFilterTest() throws IOException {
-        byte[] byteArray = new byte[]{2, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}; // length = 2
-
         int numberOfElements = 10;
         byte minSize = 1;
         PartitionOffset partitionOffset = PartitionOffset.POINT;
@@ -70,7 +68,9 @@ public class PartialVariableHashFilterTest {
         filter.add(hash1);
 
         byte[] result = filter.writeTo();
-        assert result.length == 11;
+        assert result.length == 21;
+        assert expectedArray[0].equals(filter.getArray()[0]);
+        assert expectedArray[1].equals(filter.getArray()[1]);
     }
 
     @Test
@@ -205,7 +205,7 @@ public class PartialVariableHashFilterTest {
         float probRate = 0.000001F;
         byte[] hash1 = new byte[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
         byte[] hash2 = new byte[]{0, 0, 11, 12, 13, 14, 15};
-        byte[] expectedBytes = new byte[]{5, 0, 0, 11, 12, 13, 0, 1, 2, 3, 4};
+        byte[] expectedBytes = new byte[]{0, 1, 53, -122, 55, -67, 0, 0, 0, 3, 5, 0, 0, 11, 12, 13, 0, 1, 2, 3, 4};
 
         PartialVariableHashFilter filter = new PartialVariableHashFilter(minSize, partitionOffset, numberOfElements, probRate);
         filter.add(hash1);
